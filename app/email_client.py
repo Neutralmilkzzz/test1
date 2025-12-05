@@ -38,7 +38,17 @@ def fetch_recent(imap_host: str, imap_port: int, login_email: str, app_password:
         status, msg_data = mail.uid('fetch', uid, '(RFC822)')
         if status != "OK" or not msg_data:
             continue
-        msg = email.message_from_bytes(msg_data[0][1])
+
+        # 兼容部分服务器返回的多段响应，提取第一段有效的 RFC822 正文字节
+        msg_bytes = None
+        for part in msg_data:
+            if isinstance(part, tuple) and len(part) >= 2 and part[1]:
+                msg_bytes = part[1]
+                break
+        if not msg_bytes:
+            continue
+
+        msg = email.message_from_bytes(msg_bytes)
         subject = _decode_subject(msg.get("Subject"))
         from_ = msg.get("From", "未知发件人")
         if "<" in from_ and ">" in from_:
