@@ -14,10 +14,11 @@ def _decode_subject(raw_subject):
 
 def fetch_recent(imap_host: str, imap_port: int, login_email: str, app_password: str, hours: int = 24, limit: int = 50) -> List[Dict[str, Any]]:
     mail = imaplib.IMAP4_SSL(imap_host, imap_port)
-    imaplib.Commands['ID'] = ('NONAUTH','AUTH', 'SELECTED')
-    args = ("name", "imaplib", "version", "1.0.0")
-    mail._simple_command('ID', '("' + '" "'.join(args)+'")')
     mail.login(login_email, app_password)
+    # 某些 163/188 服务器要求登录后上报 IMAP ID 才允许 SELECT，避免 "Unsafe Login"
+    imaplib.Commands['ID'] = ('NONAUTH', 'AUTH', 'SELECTED')
+    args = ("name", "imaplib", "contact", login_email, "version", "1.0.0", "vendor", "app-client")
+    mail._simple_command('ID', '("' + '" "'.join(args) + '")')
     mail.select("INBOX")
 
     since_date = (datetime.utcnow() - timedelta(hours=hours)).strftime('%d-%b-%Y')
