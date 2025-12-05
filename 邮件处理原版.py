@@ -36,19 +36,19 @@ import os
 TIME_GAP = 3600
 
 # 邮箱登录信息 - 163邮箱专用配置
-EMAIL_ACCOUNT = "18301713463@163.com"  # 你的163邮箱地址<-修改这里---------------
-EMAIL_PASSWORD = "UYyV23m48f8Jzvvp"  # 163邮箱授权码（不是登录密码）<-修改这里---------------
+EMAIL_ACCOUNT = "11111"  # 你的163邮箱地址<-修改这里---------------
+EMAIL_PASSWORD = "1111"  # 163邮箱授权码（不是登录密码）<-修改这里---------------
 IMAP_SERVER = "imap.163.com"  # 163邮箱的IMAP服务器
 IMAP_PORT = 993  # IMAP的安全端口号
 
 # DeepSeek API配置
-DEEPSEEK_API_KEY = "sk-621f6588c406440a8c5439ceaebbe899"  # DeepSeek API密钥<-修改这里---------------
+DEEPSEEK_API_KEY = "1111"  # DeepSeek API密钥<-修改这里---------------
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"  # DeepSeek API网址
 
 # 发送邮件的配置 - 163邮箱SMTP配置
 SMTP_SERVER = "smtp.163.com"  # 163邮箱的SMTP服务器
 SMTP_PORT = 465  # 163邮箱SMTP的SSL端口号
-RECIPIENT_EMAIL = "isaaczhao771@gmail.com"  # 接收总结邮件的邮箱地址<-修改这里---------------
+RECIPIENT_EMAIL = "1111"  # 接收总结邮件的邮箱地址<-修改这里---------------
 
 # 文件路径配置
 SUMMARY_DIR = "daily_summaries"  # 存放每日总结的文件夹名称
