@@ -153,19 +153,31 @@
               {% if acc and acc.recent %}
                 <div class="mt-4 border-t border-gray-100 pt-3">
                   <p class="text-sm font-semibold text-gray-900 mb-2">最近邮件</p>
-                  <div class="divide-y divide-gray-100">
-                    {% for s in acc.recent %}
-                      <div class="py-2">
-                        <div class="flex items-center justify-between">
-                          <span class="text-sm text-gray-700 font-medium">{{ s.subject }}</span>
-                          {% if s.received_at %}
-                            <span class="text-xs text-gray-400">{{ s.received_at.strftime('%m-%d %H:%M') }}</span>
-                          {% endif %}
-                        </div>
-                        <div class="text-xs text-gray-500">{{ s.sender }}</div>
-                        <div class="text-sm text-gray-600 mt-1 line-clamp-3">{{ s.summary_text }}</div>
-                      </div>
-                    {% endfor %}
+                  <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">标题（原文）</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">发送者</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">内容（中文三句话以内概括）</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">发送时间</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                        {% for s in acc.recent %}
+                          <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ s.subject }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ s.sender }}</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">{{ s.summary_text }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {% if s.received_at %}
+                                {{ s.received_at.strftime('%Y-%m-%d %H:%M') }}
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               {% endif %}

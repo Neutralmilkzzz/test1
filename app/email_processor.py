@@ -13,13 +13,14 @@ settings = get_settings()
 async def process_account(db: Session, account: models.EmailAccount, summary_max_chars: int = None):
     summary_max_chars = summary_max_chars or settings.summary_max_chars
     app_password = decrypt_secret(account.app_password_enc)
+    # Fetch ALL messages (hours=0 or None) and increase limit
     messages = fetch_recent(
         account.imap_host,
         account.imap_port,
         account.login_email,
         app_password,
-        hours=24,
-        limit=settings.fetch_limit,
+        hours=0, 
+        limit=1000, # Increase limit to capture more
     )
     if not messages:
         account.last_checked_at = datetime.utcnow()
@@ -43,12 +44,23 @@ async def process_account(db: Session, account: models.EmailAccount, summary_max
         top5_subjects = []
 
     for msg in messages:
-        body_snip = (msg['body'] or '')[:summary_max_chars]
+        # Use DeepSeek to summarize each email
+        body_content = msg['body'] or ''
+        try:
+            # Only summarize if body is long enough, otherwise just use it
+            if len(body_content) > 50:
+                summary_text = await deepseek.summarize(body_content[:2000]) # Limit input to avoid token limits
+            else:
+                summary_text = body_content
+        except Exception as e:
+            print(f"Summary failed for {msg['subject']}: {e}")
+            summary_text = body_content[:summary_max_chars]
+
         record = models.Summary(
             email_account_id=account.id,
             subject=msg['subject'],
             sender=msg['from'],
-            summary_text=body_snip,
+            summary_text=summary_text,
             received_at=msg['received_at'],
             source_uid=msg['uid'],
         )

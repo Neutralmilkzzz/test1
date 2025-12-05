@@ -12,7 +12,7 @@ async def summarize(content: str) -> str:
     data = {
         "model": "deepseek-chat",
         "messages": [
-            {"role": "system", "content": "你是一个专业的邮件总结助手。请用简洁中文总结邮件核心内容，突出重要信息和行动项，不超过80字。"},
+            {"role": "system", "content": "你是一个专业的邮件总结助手。请用简洁中文总结邮件核心内容，突出重要信息和行动项，控制在三句话以内。"},
             {"role": "user", "content": f"请总结以下邮件内容，提取关键信息：\n\n{content}"},
         ],
         "temperature": 0.3,

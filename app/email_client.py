@@ -21,8 +21,14 @@ def fetch_recent(imap_host: str, imap_port: int, login_email: str, app_password:
     mail._simple_command('ID', '("' + '" "'.join(args) + '")')
     mail.select("INBOX")
 
-    since_date = (datetime.utcnow() - timedelta(hours=hours)).strftime('%d-%b-%Y')
-    status, data = mail.search(None, "SINCE", since_date)
+    if hours is None or hours <= 0:
+        # Fetch ALL messages
+        status, data = mail.uid('search', None, "ALL")
+    else:
+        since_date = (datetime.utcnow() - timedelta(hours=hours)).strftime('%d-%b-%Y')
+        # 使用 UID 搜索，避免后续 UID/序列号混用导致取信失败
+        status, data = mail.uid('search', None, "SINCE", since_date)
+
     if status != "OK":
         mail.logout()
         return []
@@ -75,15 +81,14 @@ def fetch_recent(imap_host: str, imap_port: int, login_email: str, app_password:
             if payload:
                 body = payload.decode('utf-8', errors='ignore')
 
-        # 只保留过去 hours 内的邮件
-        if received_at >= datetime.utcnow() - timedelta(hours=hours):
-            messages.append({
-                "uid": uid.decode(),
-                "subject": subject,
-                "from": from_,
-                "body": body,
-                "received_at": received_at,
-            })
+        # 已通过 IMAP SINCE 过滤，这里不再额外丢弃，避免时区偏差导致被误判
+        messages.append({
+            "uid": uid.decode(),
+            "subject": subject,
+            "from": from_,
+            "body": body,
+            "received_at": received_at,
+        })
 
     mail.logout()
     # 按时间倒序
