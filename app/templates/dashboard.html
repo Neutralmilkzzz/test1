@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>控制台</h2>
+<p style="color:var(--muted); font-size:14px;">添加 163 邮箱授权码和接收邮箱，系统会定期拉取未读邮件，总结并转发。</p>
+<div class="row">
+  <div class="grow">
+    <h3>添加 163 账号</h3>
+    <form method="post" action="/accounts/create">
+      <input name="login_email" type="email" placeholder="163 邮箱地址" required>
+      <input name="app_password" type="password" placeholder="163 授权码（IMAP/SMTP）" required>
+      <input name="destination_email" type="email" placeholder="接收总结的邮箱" required>
+      <div style="display:flex; gap:8px;">
+        <input name="imap_host" type="text" placeholder="IMAP 主机 (默认 {{ defaults.imap_host }})">
+        <input name="imap_port" type="number" placeholder="IMAP 端口 (默认 {{ defaults.imap_port }})">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <input name="smtp_host" type="text" placeholder="SMTP 主机 (默认 {{ defaults.smtp_host }})">
+        <input name="smtp_port" type="number" placeholder="SMTP 端口 (默认 {{ defaults.smtp_port }})">
+      </div>
+      <button type="submit">保存并开始</button>
+    </form>
+    <p style="margin-top:8px; color:var(--muted); font-size:13px;">确保在 163 开启 IMAP/SMTP；学校邮箱请在网页版设置里开启自动转发到你的 163 邮箱。</p>
+  </div>
+  <div class="grow">
+    <h3>我的账号</h3>
+    {% if accounts %}
+      <table>
+        <tr><th>邮箱</th><th>接收邮箱</th><th>上次检查</th><th>操作</th></tr>
+        {% for a in accounts %}
+          <tr>
+            <td>{{ a.login_email }}</td>
+            <td>{{ a.destination_email }}</td>
+            <td>{{ a.last_checked_at or '未检查' }}</td>
+            <td>
+              <form method="post" action="/accounts/{{ a.id }}/delete" onsubmit="return confirm('确定删除并停止服务？');">
+                <button class="secondary" type="submit">删除</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>还没有添加账号。</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

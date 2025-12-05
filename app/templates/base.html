@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title or "邮箱总结服务" }}</title>
+  <style>
+    :root { --bg:#f5f7fb; --card:#ffffff; --primary:#0f6fff; --text:#1f2933; --muted:#52606d; --border:#e1e8f0; }
+    body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; margin:0; padding:0; background:var(--bg); color:var(--text); }
+    header { padding:16px 24px; background:var(--card); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .container { max-width:960px; margin:24px auto; padding:0 16px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; box-shadow:0 6px 18px rgba(15,111,255,0.05); }
+    h1,h2,h3 { margin:0 0 12px 0; }
+    form { display:flex; flex-direction:column; gap:10px; }
+    input { padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; }
+    button { background:var(--primary); color:white; border:none; border-radius:8px; padding:10px 14px; font-weight:600; cursor:pointer; }
+    button.secondary { background:#e8eef5; color:var(--text); }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { text-align:left; padding:10px; border-bottom:1px solid var(--border); font-size:14px; }
+    .row { display:flex; gap:16px; flex-wrap:wrap; }
+    .grow { flex:1 1 300px; }
+    .message { margin:12px 0; padding:10px 12px; border-radius:8px; }
+    .message.error { background:#ffe8e6; color:#b30000; }
+    .message.success { background:#e6f7ed; color:#0f6f3d; }
+    a { color:var(--primary); text-decoration:none; }
+    nav a { margin-left:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>163 邮件总结服务</strong></div>
+    <nav>
+      {% if user %}
+        <span style="color:var(--muted); font-size:14px;">{{ user.email }}</span>
+        <form method="post" action="/logout" style="display:inline; margin-left:8px;">
+          <button class="secondary" type="submit">退出</button>
+        </form>
+      {% else %}
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+      {% endif %}
+    </nav>
+  </header>
+  <div class="container">
+    {% if message %}
+      <div class="message {{ message_type or 'success' }}">{{ message }}</div>
+    {% endif %}
+    <div class="card">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>
