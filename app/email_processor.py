@@ -72,7 +72,7 @@ async def process_account(db: Session, account: models.EmailAccount, summary_max
     return processed
 
 
-async def process_all(db_factory, interval: int):
+async def process_all(db_factory, interval: int, run_once: bool = False):
     while True:
         db = db_factory()
         try:
@@ -81,4 +81,8 @@ async def process_all(db_factory, interval: int):
                 await process_account(db, account)
         finally:
             db.close()
+
+        if run_once:
+            break
+
         await asyncio.sleep(interval)

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     smtp_port: int = 465
 
     poll_interval_seconds: int = 600
+    poll_run_once: bool = True
     fetch_limit: int = 20
     summary_max_chars: int = 2000
 
