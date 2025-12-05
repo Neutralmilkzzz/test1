@@ -1,47 +1,132 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>控制台</h2>
-<p style="color:var(--muted); font-size:14px;">添加 163 邮箱授权码和接收邮箱，系统会定期拉取未读邮件，总结并转发。</p>
-<div class="row">
-  <div class="grow">
-    <h3>添加 163 账号</h3>
-    <form method="post" action="/accounts/create">
-      <input name="login_email" type="email" placeholder="163 邮箱地址" required>
-      <input name="app_password" type="password" placeholder="163 授权码（IMAP/SMTP）" required>
-      <input name="destination_email" type="email" placeholder="接收总结的邮箱" required>
-      <div style="display:flex; gap:8px;">
-        <input name="imap_host" type="text" placeholder="IMAP 主机 (默认 {{ defaults.imap_host }})">
-        <input name="imap_port" type="number" placeholder="IMAP 端口 (默认 {{ defaults.imap_port }})">
-      </div>
-      <div style="display:flex; gap:8px;">
-        <input name="smtp_host" type="text" placeholder="SMTP 主机 (默认 {{ defaults.smtp_host }})">
-        <input name="smtp_port" type="number" placeholder="SMTP 端口 (默认 {{ defaults.smtp_port }})">
-      </div>
-      <button type="submit">保存并开始</button>
-    </form>
-    <p style="margin-top:8px; color:var(--muted); font-size:13px;">确保在 163 开启 IMAP/SMTP；学校邮箱请在网页版设置里开启自动转发到你的 163 邮箱。</p>
+<div class="space-y-6">
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">控制台</h2>
+      <p class="mt-1 text-sm text-gray-500">管理您的 163 邮箱监控任务，系统将定期拉取未读邮件并发送总结。</p>
+    </div>
   </div>
-  <div class="grow">
-    <h3>我的账号</h3>
-    {% if accounts %}
-      <table>
-        <tr><th>邮箱</th><th>接收邮箱</th><th>上次检查</th><th>操作</th></tr>
-        {% for a in accounts %}
-          <tr>
-            <td>{{ a.login_email }}</td>
-            <td>{{ a.destination_email }}</td>
-            <td>{{ a.last_checked_at or '未检查' }}</td>
-            <td>
-              <form method="post" action="/accounts/{{ a.id }}/delete" onsubmit="return confirm('确定删除并停止服务？');">
-                <button class="secondary" type="submit">删除</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
-    {% else %}
-      <p>还没有添加账号。</p>
-    {% endif %}
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <!-- Add Account Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-100">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">添加监控账号</h3>
+        <form action="/accounts/create" method="POST" class="space-y-4">
+          <div>
+            <label for="login_email" class="block text-sm font-medium text-gray-700">163 邮箱地址</label>
+            <div class="mt-1">
+              <input type="email" name="login_email" id="login_email" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="example@163.com">
+            </div>
+          </div>
+
+          <div>
+            <label for="app_password" class="block text-sm font-medium text-gray-700">授权码 (IMAP/SMTP)</label>
+            <div class="mt-1">
+              <input type="password" name="app_password" id="app_password" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="不是登录密码">
+            </div>
+          </div>
+
+          <div>
+            <label for="destination_email" class="block text-sm font-medium text-gray-700">接收总结的邮箱</label>
+            <div class="mt-1">
+              <input type="email" name="destination_email" id="destination_email" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="your-email@gmail.com">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="imap_host" class="block text-sm font-medium text-gray-700">IMAP 主机</label>
+              <div class="mt-1">
+                <input type="text" name="imap_host" id="imap_host" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="{{ defaults.imap_host }}">
+              </div>
+            </div>
+            <div>
+              <label for="imap_port" class="block text-sm font-medium text-gray-700">IMAP 端口</label>
+              <div class="mt-1">
+                <input type="number" name="imap_port" id="imap_port" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="{{ defaults.imap_port }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="smtp_host" class="block text-sm font-medium text-gray-700">SMTP 主机</label>
+              <div class="mt-1">
+                <input type="text" name="smtp_host" id="smtp_host" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="{{ defaults.smtp_host }}">
+              </div>
+            </div>
+            <div>
+              <label for="smtp_port" class="block text-sm font-medium text-gray-700">SMTP 端口</label>
+              <div class="mt-1">
+                <input type="number" name="smtp_port" id="smtp_port" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" placeholder="{{ defaults.smtp_port }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+              保存并开始监控
+            </button>
+            <p class="mt-2 text-xs text-gray-500 text-center">请确保已在 163 邮箱设置中开启 IMAP/SMTP 服务。</p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- My Accounts Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex flex-col">
+      <div class="px-4 py-5 sm:p-6 flex-grow">
+        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">我的监控账号</h3>
+        {% if accounts %}
+          <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">监控邮箱</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">接收邮箱</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">状态</th>
+                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                    <span class="sr-only">操作</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                {% for a in accounts %}
+                  <tr>
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ a.login_email }}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ a.destination_email }}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {% if a.last_checked_at %}
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                          活跃
+                        </span>
+                        <div class="text-xs text-gray-400 mt-1">{{ a.last_checked_at.strftime('%m-%d %H:%M') }}</div>
+                      {% else %}
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                          等待检查
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                      <form method="post" action="/accounts/{{ a.id }}/delete" onsubmit="return confirm('确定删除并停止服务？');" class="inline">
+                        <button type="submit" class="text-red-600 hover:text-red-900">删除</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <i class="fa-regular fa-folder-open text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500 text-sm">还没有添加任何账号。</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

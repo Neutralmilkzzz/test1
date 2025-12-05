@@ -45,6 +45,19 @@ def _require_user(request: Request, db: Session):
     return user
 
 
+def _int_or_none(val):
+    if val is None:
+        return None
+    if isinstance(val, int):
+        return val
+    if isinstance(val, str) and val.strip() == "":
+        return None
+    try:
+        return int(val)
+    except ValueError:
+        return None
+
+
 @router.get("/")
 async def root(request: Request):
     token = request.session.get("token")
@@ -141,13 +154,16 @@ async def create_account(
     app_password: str = Form(...),
     destination_email: str = Form(...),
     imap_host: str | None = Form(None),
-    imap_port: int | None = Form(None),
+    imap_port: str | None = Form(None),
     smtp_host: str | None = Form(None),
-    smtp_port: int | None = Form(None),
+    smtp_port: str | None = Form(None),
 ):
     user = _current_user(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    imap_port_val = _int_or_none(imap_port) or settings.imap_port
+    smtp_port_val = _int_or_none(smtp_port) or settings.smtp_port
 
     acct = models.EmailAccount(
         user_id=user.id,
@@ -155,9 +171,9 @@ async def create_account(
         app_password_enc=encrypt_secret(app_password),
         destination_email=destination_email,
         imap_host=imap_host or settings.imap_host,
-        imap_port=imap_port or settings.imap_port,
+        imap_port=imap_port_val,
         smtp_host=smtp_host or settings.smtp_host,
-        smtp_port=smtp_port or settings.smtp_port,
+        smtp_port=smtp_port_val,
     )
     db.add(acct)
     db.commit()
