@@ -128,12 +128,28 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     accounts = db.query(models.EmailAccount).filter(models.EmailAccount.user_id == user.id).order_by(models.EmailAccount.created_at.desc()).all()
+    summaries_by_account: dict[str, dict[str, list[models.Summary]]] = {}
+    for a in accounts:
+        summaries = (
+            db.query(models.Summary)
+            .filter(models.Summary.email_account_id == a.id)
+            .order_by(models.Summary.received_at.desc().nullslast(), models.Summary.sent_at.desc())
+            .limit(20)
+            .all()
+        )
+        top5_summary = next((s for s in summaries if s.subject.startswith("[TOP5]")), None)
+        recent_items = [s for s in summaries if not s.subject.startswith("[TOP5]")][:10]
+        summaries_by_account[a.id] = {
+            "top5": top5_summary,
+            "recent": recent_items,
+        }
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
             "user": user,
             "accounts": accounts,
+            "summaries": summaries_by_account,
             "message": flash["text"] if flash else None,
             "message_type": flash["category"] if flash else None,
             "defaults": {

@@ -1,7 +1,7 @@
 import imaplib
 import email
 from email.header import decode_header
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
 
@@ -12,7 +12,7 @@ def _decode_subject(raw_subject):
     return subject or "无主题"
 
 
-def fetch_unseen(imap_host: str, imap_port: int, login_email: str, app_password: str, last_uid: str | None = None, limit: int = 20) -> List[Dict[str, Any]]:
+def fetch_recent(imap_host: str, imap_port: int, login_email: str, app_password: str, hours: int = 24, limit: int = 50) -> List[Dict[str, Any]]:
     mail = imaplib.IMAP4_SSL(imap_host, imap_port)
     imaplib.Commands['ID'] = ('NONAUTH','AUTH', 'SELECTED')
     args = ("name", "imaplib", "version", "1.0.0")
@@ -20,10 +20,8 @@ def fetch_unseen(imap_host: str, imap_port: int, login_email: str, app_password:
     mail.login(login_email, app_password)
     mail.select("INBOX")
 
-    criteria = "UNSEEN"
-    if last_uid:
-        criteria = f"(UID {int(last_uid)+1}:* UNSEEN)"
-    status, data = mail.uid('search', None, criteria)
+    since_date = (datetime.utcnow() - timedelta(hours=hours)).strftime('%d-%b-%Y')
+    status, data = mail.search(None, "SINCE", since_date)
     if status != "OK":
         mail.logout()
         return []
@@ -66,13 +64,16 @@ def fetch_unseen(imap_host: str, imap_port: int, login_email: str, app_password:
             if payload:
                 body = payload.decode('utf-8', errors='ignore')
 
-        messages.append({
-            "uid": uid.decode(),
-            "subject": subject,
-            "from": from_,
-            "body": body,
-            "received_at": received_at,
-        })
+        # 只保留过去 hours 内的邮件
+        if received_at >= datetime.utcnow() - timedelta(hours=hours):
+            messages.append({
+                "uid": uid.decode(),
+                "subject": subject,
+                "from": from_,
+                "body": body,
+                "received_at": received_at,
+            })
 
     mail.logout()
-    return messages
+    # 按时间倒序
+    return sorted(messages, key=lambda m: m["received_at"], reverse=True)
