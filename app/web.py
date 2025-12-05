@@ -85,6 +85,9 @@ async def register_page(request: Request):
 
 @router.post("/register")
 async def register(request: Request, db: Session = Depends(get_db), email: str = Form(...), password: str = Form(...)):
+    if len(password) < 8 or len(password) > 128:
+        _flash(request, "密码长度需在 8-128 字符", "error")
+        return RedirectResponse(url="/register", status_code=status.HTTP_303_SEE_OTHER)
     exists = db.query(models.User).filter(models.User.email == email).first()
     if exists:
         _flash(request, "邮箱已注册", "error")

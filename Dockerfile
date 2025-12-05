@@ -6,7 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 使用国内镜像加速并设置超时
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple --default-timeout=120 -r requirements.txt
 
 COPY . .
 

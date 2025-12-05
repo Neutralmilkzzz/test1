@@ -20,6 +20,8 @@ def authenticate_user(db: Session, email: str, password: str):
 
 @router.post("/register", response_model=schemas.UserOut)
 def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
+    if len(payload.password) < 8 or len(payload.password) > 128:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="password length must be 8-128 characters")
     exists = db.query(models.User).filter(models.User.email == payload.email).first()
     if exists:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="email already registered")

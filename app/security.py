@@ -5,7 +5,8 @@ from passlib.context import CryptContext
 from cryptography.fernet import Fernet
 from app.settings import get_settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use pbkdf2_sha256 to avoid bcrypt backend/version issues and 72-byte limits
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 settings = get_settings()
 fernet = Fernet(settings.fernet_key)
 
